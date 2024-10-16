@@ -1,4 +1,4 @@
-module github.com/ospcorp/modvault
+module modvault
 
 go 1.23.2
 

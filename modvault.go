@@ -27,6 +27,6 @@ import (
 
 // main gets flags, determines what backend is used, passes flags to backend module via function call
 func main() {
-	config := config.GetConfig()
+	config := config.GetConfig(config.ConfigChoices{})
 	fmt.Printf("Backend: %s", config.Backend)
 }

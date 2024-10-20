@@ -80,11 +80,12 @@ func readConfigFile() ConfigChoices {
 
 // GetConfig takes in config values passed in as command line arguments
 // and merges them with values read from a configuration file.
-func GetConfig() Config {
+func GetConfig(argumentChoices ConfigChoices) Config {
 	// GetConfig
 	// trash implementation
 	configFileChoices := readConfigFile()
-	backendChoice, err := backend.GetBackend(configFileChoices.DefaultBackend)
+	mergedChoices := argumentChoices.MergeOnto(configFileChoices)
+	backendChoice, err := backend.GetBackend(mergedChoices.DefaultBackend)
 	if err != nil {
 		panic(err)
 	}

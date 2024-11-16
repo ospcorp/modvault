@@ -1,6 +1,6 @@
 # modvault
 
-A Go CLI that replicates the functionality of saineju's [Modular Key Vault](https://github.com/saineju/modular_key_vault/tree/master).
+A Go CLI that replicates the functionality of [saineju](https://github.com/saineju)'s [Modular Key Vault](https://github.com/saineju/modular_key_vault/tree/master).
 
 ## Building modvault
 

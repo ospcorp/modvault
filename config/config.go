@@ -1,65 +1,39 @@
 package config
 
 import (
+	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
-	"reflect"
+	"strings"
 
 	"modvault/backend"
 )
 
-const defaultConfigFilename = ".modvault.config"
+const (
+	defaultConfigFilename = ".modvault.config"
+)
 
-type ConfigChoices struct {
-	DefaultBackend string `json:"backend"`
-	DefaultPrefix  string `json:"prefix,omitempty"`
-	DefaultTTL     string `json:"ttl"`
-}
-
-func (cc ConfigChoices) MergeOnto(target ConfigChoices) ConfigChoices {
-	var mergedChoices ConfigChoices
-	ccType := reflect.TypeOf(mergedChoices)
-	ccVal := reflect.ValueOf(cc)
-	tVal := reflect.ValueOf(target)
-	resultVal := reflect.ValueOf(&mergedChoices)
-
-	for i := 0; i < ccType.NumField(); i++ {
-		var resultFieldVal string
-		ccFieldVal := ccVal.Field(i)
-		targetFieldVal := tVal.Field(i)
-
-		if ccFieldVal.String() == "" {
-			resultFieldVal = targetFieldVal.String()
-		} else {
-			resultFieldVal = ccFieldVal.String()
-		}
-
-		resultVal.Elem().Field(i).SetString(resultFieldVal)
-	}
-
-	return mergedChoices
-}
-
-type Config struct {
-	Backend backend.Backend
-	Prefix  string
-	TTL     string
-}
+var inputReader = bufio.NewReader(os.Stdin)
 
 func getConfigFilePath() string {
-	usr, _ := user.Current()
+	usr, err := user.Current()
+	if err != nil {
+		// TODO: better error handling
+		panic(err)
+	}
 	configPath := filepath.Join(usr.HomeDir, defaultConfigFilename)
 	return configPath
 }
 
 // readConfigFile takes a file path as an argument or defaults to the
 // default configuration file. The file should be in JSON format.
-// readConfigFile unmarshals the JSON file into a ConfigChoices struct.
+// readConfigFile unmarshals the JSON file into a Configuration struct.
 // If a path is not provided and the default configuration file does
 // not exist, readConfigFile calls promptGenerateConfig.
-func readConfigFile() ConfigChoices {
+func readConfigFile() backend.Configuration {
 	// TODO: take file path as argument
 	f, err := os.ReadFile(getConfigFilePath())
 	// TODO: if config file does not exist, prompt config creation
@@ -67,7 +41,7 @@ func readConfigFile() ConfigChoices {
 		panic(err)
 	}
 
-	var configFileChoices ConfigChoices
+	var configFileChoices backend.Configuration
 
 	err = json.Unmarshal(f, &configFileChoices)
 	if err != nil {
@@ -78,16 +52,35 @@ func readConfigFile() ConfigChoices {
 	return configFileChoices
 }
 
+func promptForConfiguration() backend.Configuration {
+	var choices backend.Configuration
+	// TODO: refactor this into something nicer if it makes sense
+	backendNames := strings.Join(backend.ListBackendNames(), ", ")
+	backendPrompt := fmt.Printf("Please define the default backend (%s):\n> ", backendNames)
+	choices.BackendName = promptForInput(backendPrompt, backendValidator)
+
+	return choices
+}
+
+type validator func(string) bool
+
+func promptForInput(prompt string, fn validator) string {
+	fmt.Println(prompt)
+	text, _ := inputReader.ReadString('\n')
+	if fn(text) {
+		return text
+	}
+	return ""
+}
+
+func backendValidator(backendName string) bool {
+	return false
+}
+
 // GetConfig takes in config values passed in as command line arguments
 // and merges them with values read from a configuration file.
-func GetConfig(argumentChoices ConfigChoices) Config {
-	// GetConfig
-	// trash implementation
+func GetConfig(argumentChoices backend.Configuration) backend.Configuration {
 	configFileChoices := readConfigFile()
 	mergedChoices := argumentChoices.MergeOnto(configFileChoices)
-	backendChoice, err := backend.GetBackend(mergedChoices.DefaultBackend)
-	if err != nil {
-		panic(err)
-	}
-	return Config{Backend: backendChoice}
+	return mergedChoices
 }

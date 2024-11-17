@@ -6,26 +6,26 @@ import (
 
 func TestMergeOnto(t *testing.T) {
 	// TODO: convert this table driven test
-	ccA := ConfigChoices{"backendA", "prefixA", "ttlA"}
-	ccB := ConfigChoices{"backendB", "", "ttlB"}
+	ccA := Configuration{"backendA", "prefixA", "ttlA"}
+	ccB := Configuration{"backendB", "", "ttlB"}
 
 	ccResult := ccB.MergeOnto(ccA)
 
-	backendCorrect := ccB.DefaultBackend
-	if ccResult.DefaultBackend != backendCorrect {
-		t.Errorf("Config merging failed. DefaultBackend should be %q but was %q\n",
-			backendCorrect, ccResult.DefaultBackend)
+	backendCorrect := ccB.BackendName
+	if ccResult.BackendName != backendCorrect {
+		t.Errorf("Config merging failed. BackendName should be %q but was %q\n",
+			backendCorrect, ccResult.BackendName)
 	}
 
-	prefixCorrect := ccA.DefaultPrefix
-	if ccResult.DefaultPrefix != prefixCorrect {
-		t.Errorf("Config merging failed. DefaultPrefix should be %q but was %q\n",
-			prefixCorrect, ccResult.DefaultPrefix)
+	prefixCorrect := ccA.Prefix
+	if ccResult.Prefix != prefixCorrect {
+		t.Errorf("Config merging failed. Prefix should be %q but was %q\n",
+			prefixCorrect, ccResult.Prefix)
 	}
 
-	ttlCorrect := ccB.DefaultTTL
-	if ccResult.DefaultTTL != ttlCorrect {
-		t.Errorf("Config merging failed. DefaultTTL should be %q but was %q\n",
-			ttlCorrect, ccResult.DefaultTTL)
+	ttlCorrect := ccB.TTL
+	if ccResult.TTL != ttlCorrect {
+		t.Errorf("Config merging failed. TTL should be %q but was %q\n",
+			ttlCorrect, ccResult.TTL)
 	}
 }

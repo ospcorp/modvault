@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"modvault/backend"
 	"modvault/config"
 )
 
@@ -16,6 +17,7 @@ import (
     |- config
         |- config.go
     |- flags (using Cobra)
+    |- keys
     |- token (if necessary)
     |- modvault.go
     |- go.mod
@@ -27,6 +29,6 @@ import (
 
 // main gets flags, determines what backend is used, passes flags to backend module via function call
 func main() {
-	config := config.GetConfig(config.ConfigChoices{})
-	fmt.Printf("Backend: %s", config.Backend)
+	configuration := config.GetConfig(backend.Configuration{})
+	fmt.Printf("Backend: %s", configuration.BackendName)
 }
